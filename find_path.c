@@ -1,57 +1,20 @@
 #include "find_path.h"
 
-int
-main(int argc, char *argv[])
+
+int main (int argc, char* argv[])
 {
-   struct stat sb;
-   char *buf;
-   ssize_t nbytes, bufsiz;
+    int ret;
+    pid_t pid; 
+    char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
 
-   if (argc != 2) {
-       fprintf(stderr, "Usage: %s <pathname>\n", argv[0]);
-       exit(EXIT_FAILURE);
-   }
+    pid = getpid();
+    ret = proc_pidpath (pid, pathbuf, sizeof(pathbuf));
+    if ( ret <= 0 ) {
+        fprintf(stderr, "PID %d: proc_pidpath ();\n", pid);
+        fprintf(stderr, "    %s\n", strerror(errno));
+    } else {
+        printf("proc %d: %s\n", pid, pathbuf);
+    }
 
-   if (lstat(argv[1], &sb) == -1) {
-       perror("lstat");
-       exit(EXIT_FAILURE);
-   }
-
-   /* Add one to the link size, so that we can determine whether
-      the buffer returned by readlink() was truncated. */
-
-   bufsiz = sb.st_size + 1;
-
-   /* Some magic symlinks under (for example) /proc and /sys
-      report 'st_size' as zero. In that case, take PATH_MAX as
-      a "good enough" estimate. */
-
-   if (sb.st_size == 0)
-       bufsiz = PATH_MAX;
-
-   buf = malloc(bufsiz);
-   if (buf == NULL) {
-       perror("malloc");
-       exit(EXIT_FAILURE);
-   }
-
-   nbytes = readlink(argv[1], buf, bufsiz);
-   if (nbytes == -1) {
-       perror("readlink");
-       exit(EXIT_FAILURE);
-   }
-
-   printf("'%s' points to '%.*s'\n", argv[1], (int) nbytes, buf);
-
-   /* If the return value was equal to the buffer size, then the
-      the link target was larger than expected (perhaps because the
-      target was changed between the call to lstat() and the call to
-      readlink()). Warn the user that the returned target may have
-      been truncated. */
-
-   if (nbytes == bufsiz)
-       printf("(Returned buffer may have been truncated)\n");
-
-   free(buf);
-   exit(EXIT_SUCCESS);
+    return 0;
 }
