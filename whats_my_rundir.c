@@ -1,6 +1,6 @@
 #include "whats_my_rundir.h"
 
-char *whats_my_rundir(char *output)
+char *whats_my_rundir(char output[],int len)
 {
 #ifdef APPLE
     int ret;
@@ -13,6 +13,10 @@ char *whats_my_rundir(char *output)
         fprintf(stderr, "PID %d: proc_pidpath ();\n", pid);
         fprintf(stderr, "    %s\n", strerror(errno));
     }
+    for (int i=0; i<sizeof(linkname); i++)
+              {
+                output[i] = linkname[i];
+              }
 #else
 
 
@@ -37,19 +41,25 @@ char *whats_my_rundir(char *output)
    linkname[sb] = '\0';
 
 
+for (int i=0; i<sb; i++)
+              {
+                output[i] = linkname[i];
+              }
 #endif
 
    printf("Current executable is '%s'\n", linkname);
-    *output = *linkname;
-    return 0;
+    // for ii in linkname;
+    // output = *linkname;
+
+      return 0;
 
 }
 
 
 int main(int argc, char* argv[]){
-    int size = 1024;
-    char *output = (char *)malloc(sizeof(char)*size);
-    whats_my_rundir(output);
+    int size = 10024;
+    char output[size];
+    whats_my_rundir(output,size);
     printf("Current executable is '%s'\n", output);
 
 }
