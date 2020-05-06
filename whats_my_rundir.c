@@ -1,51 +1,44 @@
 #include "whats_my_rundir.h"
 
-char *whats_my_rundir(char output[],int len_array)
+int whats_my_rundir(char output[],int len_array)
 {
 #ifdef APPLE
     int ret;
     pid_t pid;
-    char linkname[PROC_PIDPATHINFO_MAXSIZE];
 
     pid = getpid();
-    ret = proc_pidpath (pid, linkname, sizeof(linkname));
+    ret = proc_pidpath (pid, output, len_array);
     if ( ret <= 0 ) {
         fprintf(stderr, "PID %d: proc_pidpath ();\n", pid);
         fprintf(stderr, "    %s\n", strerror(errno));
+        return 1;
     }
 #else
+   ssize_t r;
 
+   if ( !output || len_array < 2 )
+      return 1;
 
-    char *linkname;
-    ssize_t r;
-    int sb = 1024;
-
-   linkname = malloc(sb + 1);
-    if (linkname == NULL) {
-        fprintf(stderr, "insufficient memory\n");
-        exit(EXIT_FAILURE);
-    }
-
-   r = readlink("/proc/self/exe", linkname, sb + 1);
+   r = readlink("/proc/self/exe", output, len_array-1);
 
    if (r < 0) {
         perror("lstat");
-        exit(EXIT_FAILURE);
-    }
-   linkname[sb] = '\0';
-#endif
-    for (int i=0; i<len_array; i++)
-              {
-                output[i] = linkname[i];
-              }
-   return 0;
+        return 1;
+   }
 
+   output[r] = '\0';
+#endif
+   return 0;
 }
 
 int main(int argc, char* argv[]){
-   int size = 4096;
-   char output[size];
-   whats_my_rundir(output,size);
-   printf("%s\n", output);
-
+    int size = 1024;
+    char *output = (char *)malloc(sizeof(char)*size);
+    if( whats_my_rundir(output, size) ) {
+       fprintf(stderr,"** failure\n");
+       return 1;
+    }
+    printf("Current executable is '%s'\n", output);
+    free(output);
+    return 0;
 }
