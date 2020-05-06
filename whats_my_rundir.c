@@ -46,20 +46,15 @@ for (int i=0; i<sb; i++)
                 output[i] = linkname[i];
               }
 #endif
-
-   printf("Current executable is '%s'\n", linkname);
-    // for ii in linkname;
-    // output = *linkname;
-
-      return 0;
+   return 0;
 
 }
 
-
+   
 int main(int argc, char* argv[]){
-    int size = 10024;
-    char output[size];
-    whats_my_rundir(output,size);
-    printf("Current executable is '%s'\n", output);
+   int size = 65536;
+   char output[size];
+   whats_my_rundir(output,size);
+   printf("Current executable is '%s'\n", output);
 
 }
