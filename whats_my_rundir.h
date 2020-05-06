@@ -12,3 +12,4 @@
 #   include <limits.h>
 #endif
 
+char *whats_my_rundir(char output[],int len_array);
